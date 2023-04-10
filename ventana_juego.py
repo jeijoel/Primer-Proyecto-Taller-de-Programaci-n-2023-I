@@ -13,6 +13,7 @@
 from tkinter import * #librería de la interfaz gráfica a utilizar
 import time #librería  de tiempo
 from threading import Thread ##Thread (hilo), para evitar threading.Thread
+from types import NoneType
 
 
 #Crea la ventana del juego
@@ -37,10 +38,7 @@ no_tag_municion = 0
 
 tiempo_nave = 0.006 #indica el tiempo que pasa entre que la nave se mueve de su posición actual a la siguiente despazándose pixel por pixel
 tiempo_municion = 0.006 #indica el tiempo que pasa entre que la municion se mueve de su posición actual a la siguiente despazándose pixel por pixel
-
-def hilo_movimiento_nave_arriba():
-    up = Thread(target=movimiento_nave_arriba, args=())
-    up.start()
+frecuencia_de_disparo = 0.006
 
 def movimiento_nave_arriba():
     """
@@ -74,12 +72,12 @@ def mover_nave_arriba(event):
     y1 = lienzo_juego.bbox('nave_jugador')[1]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior izquierda del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo
     if y1 > 1:
         flag_mover_arriba = True
-        hilo_movimiento_nave_arriba()
+        movimiento_nave_arriba()
         lienzo_juego.focus_set()
 
-def hilo_movimiento_nave_abajo():
-    down = Thread(target=movimiento_nave_abajo, args=())
-    down.start()
+#Hilo para que la nave se mueva hacia arriba
+up = Thread(target=movimiento_nave_arriba, args=())
+up.start()
 
 def movimiento_nave_abajo():
     """
@@ -113,12 +111,12 @@ def mover_nave_abajo(event):
     y2 = lienzo_juego.bbox('nave_jugador')[1]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior izquierda del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo
     if y2 < 575:
         flag_mover_abajo = True
-        hilo_movimiento_nave_abajo()
+        movimiento_nave_abajo()
         lienzo_juego.focus_set()
 
-def hilo_movimiento_nave_izquierda():
-    left = Thread(target=movimiento_nave_izquierda, args=())
-    left.start()
+#Hilo para que la nave se mueva hacia abajo
+down = Thread(target=movimiento_nave_abajo, args=())
+down.start()
 
 def movimiento_nave_izquierda():
     """
@@ -152,12 +150,12 @@ def mover_nave_izquierda(event):
     x1 = lienzo_juego.bbox('nave_jugador')[0]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior izquierda del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo
     if x1 > 1:
         flag_mover_izquierda = True
-        hilo_movimiento_nave_izquierda()
+        movimiento_nave_izquierda()
         lienzo_juego.focus_set()
 
-def hilo_movimiento_nave_derecha():
-    right = Thread(target=movimiento_nave_derecha, args=())
-    right.start()
+#Hilo para que la nave se mueva hacia la izquierda
+left = Thread(target=movimiento_nave_izquierda, args=())
+left.start()
 
 def movimiento_nave_derecha():
     """
@@ -191,12 +189,17 @@ def mover_nave_derecha(event):
     x2 = lienzo_juego.bbox('nave_jugador')[2]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior derecha del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo
     if x2 < 778:
         flag_mover_derecha = True
-        hilo_movimiento_nave_derecha()
+        movimiento_nave_derecha()
         lienzo_juego.focus_set()
+
+#Hilo que para que se mueva la nave hacia la izquierda
+right = Thread(target=movimiento_nave_derecha, args=())
+right.start()
 
 def hilo_movimiento_municion(tag_municion):
     move_municion = Thread(target=movimiento_municion, args=(tag_municion,))
     move_municion.start()
+
 
 def movimiento_municion(tag_municion):
     """
@@ -204,8 +207,8 @@ def movimiento_municion(tag_municion):
     """
     global flag_mover_municion #permite cambiar el valor de la variable global
     if flag_mover_municion == True:
-        x1_municion = lienzo_juego.bbox(tag_municion)[0]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior derecha del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo
-        if x1_municion < 778:
+        x2_municion = lienzo_juego.bbox(tag_municion)[2]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior derecha del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo   
+        if x2_municion < 778:
             
             lienzo_juego.move(tag_municion, 1, 0)
             time.sleep(tiempo_municion)
@@ -213,13 +216,14 @@ def movimiento_municion(tag_municion):
             movimiento_municion(tag_municion)
         else:
             destruir_municion(tag_municion)
+        
             
 
 def destruir_municion(tag_municion):
     """
     detiene el movimiento de la nave
     """
-    global flag_mover_derecha #permite cambiar el valor de la variable global
+    global flag_mover_municion #permite cambiar el valor de la variable global
     flag_mover_municion = False
     lienzo_juego.delete(tag_municion)
 
@@ -237,10 +241,10 @@ def mover_municion(event):
         y1_municion = lienzo_juego.bbox('nave_jugador')[1] + ((lienzo_juego.bbox('nave_jugador')[3] - lienzo_juego.bbox('nave_jugador')[1]) // 2 - 1)
         x2_municion = x1_municion + 5
         y2_municion = y1_municion + 2
-        #Crea la nave (un cuadrado provisional)
+        #Crea la municion (un rectangulo)
         tag_municion = 'municion_' + str(no_tag_municion)
         municion = lienzo_juego.create_rectangle(x1_municion, y1_municion, x2_municion, y2_municion, fill = 'black', outline = 'black', tags = tag_municion)
-        no_tag_municion =+ 1
+        no_tag_municion += 1
         hilo_movimiento_municion(tag_municion)
 
 #Eventos que dan movimiento a la nave
