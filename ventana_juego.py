@@ -11,10 +11,8 @@
 **************************************************************************************************************
 """
 from tkinter import * #librería de la interfaz gráfica a utilizar
-import time #librería  de tiempo
 from threading import Thread ##Thread (hilo), para evitar threading.Thread
-from types import NoneType
-
+import time
 
 #Crea la ventana del juego
 ventana_juego = Tk()
@@ -37,12 +35,12 @@ flag_mover_municion = False #Bandera que indica si se debe moverse la municion
 no_tag_municion = 0
 
 tiempo_nave = 0.006 #indica el tiempo que pasa entre que la nave se mueve de su posición actual a la siguiente despazándose pixel por pixel
-tiempo_municion = 0.006 #indica el tiempo que pasa entre que la municion se mueve de su posición actual a la siguiente despazándose pixel por pixel
-frecuencia_de_disparo = 0.006
+tiempo_municion = 6 #indica el tiempo que pasa entre que la municion se mueve de su posición actual a la siguiente despazándose pixel por pixel
+frecuencia_de_disparo = 6
 
 def movimiento_nave_arriba():
     """
-    Mueve la nave recursivamente
+    Mueve la naverecursivamente
     """
     global flag_mover_arriba #permite cambiar el valor de la variable global
     if flag_mover_arriba == True:
@@ -81,7 +79,7 @@ up.start()
 
 def movimiento_nave_abajo():
     """
-    Mueve la nave recursivamente
+    Mueve la naverecursivamente
     """
     global flag_mover_abajo #permite cambiar el valor de la variable global
     if flag_mover_abajo == True:
@@ -120,7 +118,7 @@ down.start()
 
 def movimiento_nave_izquierda():
     """
-    Mueve la nave recursivamente
+    Mueve la naverecursivamente
     """
     global flag_mover_izquierda #permite cambiar el valor de la variable global
     if flag_mover_izquierda == True:
@@ -196,14 +194,14 @@ def mover_nave_derecha(event):
 right = Thread(target=movimiento_nave_derecha, args=())
 right.start()
 
+
 def hilo_movimiento_municion(tag_municion):
     move_municion = Thread(target=movimiento_municion, args=(tag_municion,))
     move_municion.start()
 
-
 def movimiento_municion(tag_municion):
     """
-    Mueve la municion recursivamente
+    Mueve la municion utilizando el método after
     """
     global flag_mover_municion #permite cambiar el valor de la variable global
     if flag_mover_municion == True:
@@ -211,25 +209,16 @@ def movimiento_municion(tag_municion):
         if x2_municion < 778:
             
             lienzo_juego.move(tag_municion, 1, 0)
-            time.sleep(tiempo_municion)
-            lienzo_juego.update()
-            movimiento_municion(tag_municion)
+            lienzo_juego.after(tiempo_municion, movimiento_municion, tag_municion)
         else:
-            destruir_municion(tag_municion)
+            flag_mover_municion = False
+            lienzo_juego.delete(tag_municion)
         
             
 
-def destruir_municion(tag_municion):
-    """
-    detiene el movimiento de la nave
-    """
-    global flag_mover_municion #permite cambiar el valor de la variable global
-    flag_mover_municion = False
-    lienzo_juego.delete(tag_municion)
-
 def mover_municion(event):
     """
-    Da la orden de comenzar a mover la nave
+    Da la orden de comenzar a mover la munición
     """
     global flag_mover_municion #permite cambiar el valor de la variable global
     global no_tag_municion #permite cambiar el valor de la variable global que le da distintas etiquetas a las municiones
