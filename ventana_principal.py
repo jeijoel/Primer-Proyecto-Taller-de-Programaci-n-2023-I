@@ -13,9 +13,28 @@
 from tkinter import * #librería de la interfaz gráfica a utilizar
 import time #librería  de tiempo
 from threading import Thread ##Thread (hilo), para evitar threading.Thread
+from tkinter import messagebox #librería para mostrar mensajes emergentes
 
-def ventana_juego():
+ventana_principal = Tk() #crea la ventana principal
+
+def crear_ventana_principal():
+    ventana_principal.title("Ventana Principal")
+    ventana_principal.geometry("500x500")
+
+    boton_juego = Button(ventana_principal, text="Jugar", command=crear_ventana_juego)
+    boton_juego.place(x=100, y=100)
+    boton_acerca_de = Button(ventana_principal, text="Acerca de", command=crear_ventana_acerca_de)
+    boton_acerca_de.place(x=100, y=150)
+    boton_salir = Button(ventana_principal, text="Salir", command=ventana_principal.destroy)
+    boton_salir.place(x=100, y=200)
+    boton_mejores_puntajes = Button(ventana_principal, text="Mejores Puntajes", command=crear_ventana_mejores_puntajes)
+    boton_mejores_puntajes.place(x=100, y=250)
+
+    ventana_principal.mainloop()
+
+def crear_ventana_juego():
     #Crea la ventana del juego
+    ventana_principal.withdraw() #oculta la ventana principal
     ventana_juego = Toplevel()
     ventana_juego.minsize(width = 800, height = 600)
     ventana_juego.resizable(width = NO, height = NO)
@@ -37,6 +56,13 @@ def ventana_juego():
 
     tiempo_nave = 0.006 #indica el tiempo que pasa entre que la nave se mueve de su posición actual a la siguiente despazándose pixel por pixel
     tiempo_municion = 0.006 #indica el tiempo que pasa entre que la municion se mueve de su posición actual a la siguiente despazándose pixel por pixel
+
+    def volver():
+        """
+        Vuelve a la ventana principal
+        """
+        ventana_juego.destroy()
+        ventana_principal.deiconify()
 
     def hilo_movimiento_nave_arriba():
         up = Thread(target=movimiento_nave_arriba, args=())
@@ -111,7 +137,7 @@ def ventana_juego():
         nonlocal flag_mover_abajo
 
         ventana_juego.focus_set() #pasa el foco a la ventana principal, esto evita que el evento llame a la función varias veces
-        y2 = lienzo_juego.bbox('nave_jugador')[3]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior izquierda del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo
+        y2 = lienzo_juego.bbox('nave_jugador')[1]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior izquierda del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo
         if y2 < 575:
             flag_mover_abajo = True
             hilo_movimiento_nave_abajo()
@@ -187,6 +213,7 @@ def ventana_juego():
         """
         Da la orden de comenzar a mover la nave
         """
+        nonlocal flag_mover_derecha
         ventana_juego.focus_set() #pasa el foco a la ventana principal, esto evita que el evento llame a la función varias veces
         x2 = lienzo_juego.bbox('nave_jugador')[2]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior derecha del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo
         if x2 < 778:
@@ -227,6 +254,7 @@ def ventana_juego():
         Da la orden de comenzar a mover la nave
         """
         nonlocal flag_mover_municion
+        nonlocal no_tag_municion
         x2 = lienzo_juego.bbox('nave_jugador')[2]#.bbox retorna una tupla (x1, y1, x2, y2) donde los primeros dos valores son la esquina superior derecha del rectángulo y los ultimos dos la esquina inferior derecha del rectángulo
         if x2 < 778:
             flag_mover_municion = True
@@ -255,13 +283,39 @@ def ventana_juego():
     ventana_juego.bind('<KeyRelease-Left>', detener_movimiento_nave_izquierda)
     ventana_juego.bind('<KeyRelease-Right>', detener_movimiento_nave_derecha)
 
+    boton_volver = Button(ventana_juego, text = 'Volver', command = volver)
+    boton_volver.place(x = 720, y = 550)
+
     def dame_coord(event):
         print(lienzo_juego.bbox('nave_jugador'))
 
     lienzo_juego.bind('<KeyPress-n>', dame_coord)
 
-    ventana_juego.focus_set()
-
-
+    ventana_juego.focus_get()
 
     ventana_juego.mainloop()
+
+
+def crear_ventana_acerca_de():
+    ventana_acerca_de = Toplevel()
+    ventana_acerca_de.title("Acerca de")
+    ventana_acerca_de.geometry("500x500")
+    
+    
+
+    datos_del_programador = Label(ventana_acerca_de, text="Programador: Jeison Johel Picado Picado\nIdentificación:30480034\nITCR\nIngeniería en Computadores\nCurso: Taller de Programación\nProfesor: Jeff Schmidt Peralta\nI Semestre 2020\nPaís de producción: Costa Rica\nVersión: 1.0\nVersión Python: 3.11.2\nVersión Tkinter: 8.6.12", justify=LEFT)
+    datos_del_programador.place(x=100, y=100)
+
+    boton_volver = Button(ventana_acerca_de, text="Volver", command=ventana_acerca_de.destroy)
+    boton_volver.place(x=200, y=400)
+
+    ventana_acerca_de.mainloop()
+
+
+def crear_ventana_mejores_puntajes():
+    ventana_mejores_puntajes = Toplevel()
+    ventana_mejores_puntajes.title("Mejores Puntajes")
+    ventana_mejores_puntajes.geometry("500x500")
+    ventana_mejores_puntajes.mainloop()
+
+crear_ventana_principal()
